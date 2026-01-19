@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prognosys | Comprehensive Cardiac Risk</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #020617; 
+            color: #f8fafc; 
+            overflow-x: hidden; 
+        }
+        
+        .glass {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 3px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .glass-input {
+            background: rgba(2, 6, 23, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            transition: all 0.2s ease;
+        }
+        .glass-input:focus {
+            border-color: #3b82f6;
+            outline: none;
+            background: rgba(2, 6, 23, 1);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 0px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-up { animation: fadeInUp 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+        /* Custom Styles for Recommendations */
+        .rec-item {
+            background: rgba(255, 255, 255, 0.05); 
+            border-left: 3px solid #3b82f6; /* Default Blue border */
+        }
+        .rec-item:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        
+        .results-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;    /* space between image and graph */
+        }
+
+        
+        #chart-container {
+            min-height: 600px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.02);
+            
+        }
+
+    </style>
+</head>
+
+<body class="min-h-screen flex bg-[#020617]">
+
+    <aside class="w-80 border-r border-white/5 bg-slate-900/95 hidden xl:flex flex-col p-8 fixed h-full z-50">
+        <div class="flex items-center gap-4 mb-16">
+            <div class="p-4 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-2xl shadow-xl shadow-blue-500/20">
+                <i data-lucide="activity" class="text-white w-8 h-8"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-2xl tracking-tight text-white">Prognosys</h1>
+                <p class="text-xs text-slate-400 uppercase tracking-[0.2em] font-bold mt-1">Medical AI</p>
+            </div>
+        </div>
+        <nav class="space-y-4">
+            <a href="#" class="flex items-center gap-4 px-6 py-5 rounded-2xl bg-blue-600/10 text-blue-400 border border-blue-500/20 transition-all hover:bg-blue-600/20 hover:translate-x-1">
+                <i data-lucide="heart-pulse" class="w-6 h-6"></i>
+                <span class="text-base font-bold">Risk Assessment</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 xl:ml-80 relative overflow-y-auto scroll-smooth min-h-screen pb-32">
+        
+        <div class="fixed top-0 right-0 w-[800px] h-[800px] bg-blue-600/5 blur-[150px] rounded-full pointer-events-none z-0"></div>
+        <div class="fixed bottom-0 left-0 w-[800px] h-[800px] bg-cyan-600/5 blur-[150px] rounded-full pointer-events-none z-0"></div>
+
+        <div class="max-w-[1600px] mx-auto p-6 md:p-12 lg:p-16 relative z-10">
+            
+            <div class="mb-12 animate-up">
+                <h1 class="text-5xl font-bold mb-6 text-white tracking-tight">Comprehensive Cardiac Risk</h1>
+                <p class="text-slate-400 text-xl max-w-3xl leading-relaxed">
+                    Enter full patient vitals and lab markers below for detailed risk analysis (Scoring up to 35).
+                </p>
+            </div>
+
+            <div class="glass rounded-[2rem] p-10 md:p-12 mb-16 animate-up shadow-2xl border border-white/5" style="animation-delay: 0.1s;">
+                <form id="heart-form" class="space-y-10">
+                    
+                    <h2 class="text-2xl font-bold text-blue-400 border-b border-white/5 pb-3">Patient Profile & Vitals</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+                        
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase mb-4 block tracking-[0.1em]">Patient Age</label>
+                            <input type="number" id="hp-age" value="45" class="glass-input w-full px-6 py-5 rounded-2xl text-xl placeholder-slate-600 font-medium">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase mb-4 block tracking-[0.1em]">Biological Sex</label>
+                            <div class="relative">
+                                <select id="hp-sex" class="glass-input w-full px-6 py-5 rounded-2xl text-xl appearance-none cursor-pointer font-medium">
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                                <i data-lucide="chevron-down" class="absolute right-6 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-500 pointer-events-none"></i>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="text-xs font-bold text-blue-400 uppercase mb-4 block tracking-[0.1em]">Systolic BP (mmHg)</label>
+                            <input type="number" id="hp-sys" value="120" class="glass-input w-full px-6 py-5 rounded-2xl border-l-4 border-l-blue-500 text-xl font-medium">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-blue-400 uppercase mb-4 block tracking-[0.1em]">Diastolic BP (mmHg)</label>
+                            <input type="number" id="hp-dia" value="80" class="glass-input w-full px-6 py-5 rounded-2xl border-l-4 border-l-blue-500 text-xl font-medium">
+                        </div>
+                        
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase mb-4 block tracking-[0.1em]">Heart Rate (bpm)</label>
+                            <input type="number" id="hp-hr" value="70" class="glass-input w-full px-6 py-5 rounded-2xl text-xl font-medium">
+                        </div>
+                    </div>
+
+                    <h2 class="text-2xl font-bold text-blue-400 border-b border-white/5 pb-3 pt-6">Cardiac & Lipid Markers</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+                        
+                        <div>
+                            <label class="text-xs font-bold text-red-400 uppercase mb-4 block tracking-[0.1em]">Troponin I (ng/mL)</label>
+                            <input type="number" step="0.01" id="hp-trop" value="0.00" class="glass-input w-full px-6 py-5 rounded-2xl border-l-4 border-l-red-500 text-xl font-medium">
+                        </div>
+                        
+                        <div>
+                            <label class="text-xs font-bold text-emerald-400 uppercase mb-4 block tracking-[0.1em]">Total Chol.</label>
+                            <input type="number" id="hp-chol" value="180" class="glass-input w-full px-6 py-5 rounded-2xl text-xl font-medium">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-emerald-400 uppercase mb-4 block tracking-[0.1em]">HDL (Good)</label>
+                            <input type="number" id="hp-hdl" value="50" class="glass-input w-full px-6 py-5 rounded-2xl text-xl font-medium">
+                        </div>
+                        
+                        <div>
+                            <label class="text-xs font-bold text-red-400 uppercase mb-4 block tracking-[0.1em]">LDL (Bad)</label>
+                            <input type="number" id="hp-ldl" value="100" class="glass-input w-full px-6 py-5 rounded-2xl text-xl font-medium">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-red-400 uppercase mb-4 block tracking-[0.1em]">Triglycerides</label>
+                            <input type="number" id="hp-trig" value="100" class="glass-input w-full px-6 py-5 rounded-2xl text-xl font-medium">
+                        </div>
+                        
+                        <input type="hidden" id="hp-smoker" value="No">
+                        <input type="hidden" id="hp-diabetes" value="No">
+
+                    </div>
+
+                    <div class="pt-8 flex justify-end border-t border-white/5 mt-6">
+                        <button type="submit" class="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white px-12 py-5 rounded-2xl font-bold text-lg shadow-lg shadow-blue-500/25 transition-all transform hover:scale-[1.02] active:scale-95 flex items-center gap-3">
+                            <i data-lucide="cpu" class="w-6 h-6"></i> 
+                            <span>Run Comprehensive Analysis</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="loader" class="hidden py-32 flex flex-col items-center justify-center">
+                <div class="w-20 h-20 border-[6px] border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <p class="mt-8 text-blue-300 font-mono text-sm animate-pulse tracking-[0.2em]">CALCULATING COMPREHENSIVE SCORE...</p>
+            </div>
+
+            <div id="result-section" class="hidden space-y-12 animate-up">
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                    
+                    <div id="risk-score-box" class="glass p-10 rounded-[2rem] flex flex-col justify-between min-h-[160px] md:col-span-1 border-l-8 border-l-white/10">
+                        <div>
+                            <p class="text-sm font-bold text-slate-400 uppercase mb-4 tracking-[0.1em]">Comprehensive Risk Score (Max 35)</p>
+                            <h2 id="res-score" class="text-6xl font-bold text-white tracking-tighter leading-none">--</h2>
+                        </div>
+                        <p class="text-sm text-slate-500 mt-4 font-medium" id="res-score-context">Scoring based on advanced clinical markers.</p>
+                    </div>
+
+                    <div id="risk-level-box" class="glass p-10 rounded-[2rem] flex flex-col justify-center min-h-[160px] md:col-span-1 border-l-8 border-l-white/10">
+                        <p class="text-sm font-bold text-slate-400 uppercase mb-2 tracking-[0.1em]">Risk Level</p>
+                        <h3 id="res-risk-level" class="text-4xl font-bold text-white leading-tight">--</h3>
+                        <p class="text-xs text-slate-500 mt-2">Immediate status for triage.</p>
+                    </div>
+
+                    <div class="glass p-8 rounded-[2rem] md:col-span-1 border border-red-500/20 bg-red-900/10">
+                        <div class="flex items-center gap-3 mb-4">
+                            <i data-lucide="bell" class="w-6 h-6 text-red-400"></i>
+                            <h3 class="font-bold text-red-400 uppercase text-sm tracking-wider">Critical Alerts</h3>
+                        </div>
+                        <ul id="res-critical-alerts" class="text-xs text-red-300 space-y-2">
+                            </ul>
+                    </div>
+                </div>
+
+                <div class="glass p-8 rounded-[2rem]">
+                    <h2 class="text-xl font-bold mb-6 text-blue-400 uppercase">📋 Recommended Action Plan</h2>
+                    
+                    <div id="rec-title-box" class="p-4 rounded-lg mb-4">
+                        <h3 id="res-rec-title" class="text-lg font-extrabold text-white">--</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="font-bold text-slate-300 mb-2">Base Actions:</h4>
+                            <ul id="res-recommendations" class="space-y-2">
+                                </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-300 mb-2">Factor-Specific Focus:</h4>
+                            <ul id="res-factor-recs" class="space-y-2">
+                                </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass p-8 rounded-[2rem]">
+                    <div id="chart-container" class="w-full h-[650px]"></div>
+                </div>
+            </div>
+
+
+        </div>
+        <div class="results-wrapper">
+            
+
+            <div id="chart-container"></div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        const RISK_COLORS = {
+            'Low Risk': { class: 'text-emerald-400', border: '#2ecc71', background: 'rgba(46, 204, 113, 0.2)' },
+            'Moderate Risk': { class: 'text-amber-400', border: '#f39c12', background: 'rgba(243, 156, 18, 0.2)' },
+            'High Risk': { class: 'text-orange-400', border: '#e74c3c', background: 'rgba(231, 76, 60, 0.2)' },
+            'Very High Risk': { class: 'text-red-400', border: '#c0392b', background: 'rgba(192, 57, 43, 0.2)' },
+        };
+
+        document.getElementById('heart-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const loader = document.getElementById('loader');
+            const results = document.getElementById('result-section');
+            const form = document.getElementById('heart-form');
+            
+            form.classList.add('opacity-50', 'pointer-events-none');
+            loader.classList.remove('hidden');
+            results.classList.add('hidden');
+
+            // Collect all required inputs
+            const payload = {
+                age: document.getElementById('hp-age').value,
+                sex: document.getElementById('hp-sex').value,
+                systolic_bp: document.getElementById('hp-sys').value,
+                diastolic_bp: document.getElementById('hp-dia').value, 
+                heart_rate: document.getElementById('hp-hr').value, 
+                troponin: document.getElementById('hp-trop').value, 
+                total_cholesterol: document.getElementById('hp-chol').value,
+                ldl_cholesterol: document.getElementById('hp-ldl').value,
+                hdl_cholesterol: document.getElementById('hp-hdl').value,
+                triglycerides: document.getElementById('hp-trig').value, 
+                smoker: document.getElementById('hp-smoker').value,
+                diabetes: document.getElementById('hp-diabetes').value
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/calculate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const scoreEl = document.getElementById('res-score');
+                    const levelEl = document.getElementById('res-risk-level');
+                    const scoreBox = document.getElementById('risk-score-box');
+                    const levelBox = document.getElementById('risk-level-box');
+                    const recTitleBox = document.getElementById('rec-title-box');
+                    
+                    const levelKey = data.risk_level;
+                    const colors = RISK_COLORS[levelKey];
+                    
+                    // 1. Update Score and Level Text
+                    scoreEl.innerText = data.score;
+                    levelEl.innerText = levelKey.toUpperCase();
+
+                    // 2. Apply Dynamic Styling
+                    scoreEl.className = `text-6xl font-bold ${colors.class} tracking-tighter leading-none`;
+                    levelEl.className = `text-4xl font-bold ${colors.class} leading-tight`;
+                    
+                    // Update box borders 
+                    scoreBox.style.borderLeftColor = colors.border;
+                    levelBox.style.borderLeftColor = colors.border;
+                    
+                    // 3. Populate Recommendations
+                    const recsList = document.getElementById('res-recommendations');
+                    recsList.innerHTML = '';
+                    data.recommendations.forEach((rec, index) => {
+                        recsList.innerHTML += `<li class="rec-item p-3 rounded text-sm">${index + 1}. ${rec}</li>`;
+                    });
+
+                    const factorRecsList = document.getElementById('res-factor-recs');
+                    factorRecsList.innerHTML = '';
+                    data.factor_recommendations.forEach((rec) => {
+                        factorRecsList.innerHTML += `<li class="rec-item p-3 rounded text-sm">${rec.replace('• ', '')}</li>`;
+                    });
+                    
+                    // Update Recommendation Title Bar
+                    document.getElementById('res-rec-title').innerHTML = data.recommendations[0].includes('EMERGENCY') ? 
+                        `<span class="text-red-400">🚨 ${data.recommendations[0]}</span>` : 
+                        `<span>${data.recommendations[0].split(':')[0].trim().toUpperCase()}</span>`; 
+                    recTitleBox.style.backgroundColor = colors.background;
+
+                    // 4. Populate Critical Alerts
+                    const alertsList = document.getElementById('res-critical-alerts');
+                    alertsList.innerHTML = '';
+                    if (data.critical_alerts.length === 0) {
+                        alertsList.innerHTML = '<li class="text-xs">No immediate critical markers detected.</li>';
+                    } else {
+                        data.critical_alerts.forEach(alert => {
+                            // Convert **markdown** to <b>HTML</b> for bolding
+                            alertsList.innerHTML += `<li>${alert.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}</li>`;
+                        });
+                    }
+                    
+
+                    // 5. Plotly Integration
+                    const graphData = JSON.parse(data.graphJSON);
+                    
+                    // Applying styling overrides for the dark theme
+                    graphData.layout.paper_bgcolor = 'rgba(0,0,0,0)';
+                    graphData.layout.plot_bgcolor = 'rgba(0,0,0,0)';
+                    graphData.layout.font = { color: '#94a3b8', family: 'Inter', size: 7
+    
+                     };
+                    graphData.layout.margin = {
+                        l: 0,   // left padding
+                        r: 0,   // right padding
+                        t: 120,  // top padding
+                        b: 0  // bottom padding
+                    };
+                    
+                    Plotly.newPlot('chart-container', graphData.data, graphData.layout, {
+                        responsive: true,
+                        displayModeBar: false,
+                        autosize: true
+                    }).then(() => {
+                        Plotly.Plots.resize('chart-container');
+                    });
+
+                    loader.classList.add('hidden');
+                    results.classList.remove('hidden');
+                    form.classList.remove('opacity-50', 'pointer-events-none');
+                    
+                    setTimeout(() => {
+                        results.scrollIntoView({behavior: 'smooth', block: 'center'});
+                    }, 100);
+
+                } else {
+                     alert(`Calculation Error: ${data.message || 'An unknown error occurred.'}`);
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Connection Failed. Ensure your Python backend is running on http://127.0.0.1:5000.");
+                loader.classList.add('hidden');
+                form.classList.remove('opacity-50', 'pointer-events-none');
+            }
+        });
+        
+    </script>
+</body>
+</html>

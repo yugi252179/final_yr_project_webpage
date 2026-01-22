@@ -202,7 +202,7 @@
 
             try {
                 // Fetch from local Python Backend
-                const response = await fetch('http://localhost:5000/brain', {
+                const response = await fetch('/brain', {
                     method: 'POST',
                     body: formData
                 });

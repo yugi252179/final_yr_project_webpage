@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prognosys - Brain Tumor Detection</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    
+    
+
+    <script>
+        // Theme Init
+        // This script handles the theme preference and Tailwind configuration
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { inter: ['Inter', 'sans-serif'] } } } }
+    </script>
+
+    <style>
+        /* CSS Cleaned and Simplified to avoid syntax errors */
+        
+        /* Glass UI Classes */
+        .glass-sidebar { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-right: 1px solid rgba(255,255,255,0.5); }
+        .dark .glass-sidebar { background: rgba(15, 23, 42, 0.85); border-right: 1px solid rgba(255,255,255,0.05); }
+        .glass-card { background: rgba(19, 15, 15, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(234, 229, 229, 0.5); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
+        .dark .glass-card { background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.05); }
+        
+        /* General Glass look for headers or semi-transparent sections */
+        .glass-header { background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(10px); }
+        .dark .glass-header { background: rgba(15, 23, 42, 0.5); }
+        
+        /* Glass style for the modal content background */
+        .glass-modal-content { background:  rgba(15, 23, 42, 0.5); }
+        .dark .glass-modal-content { background: rgba(30, 41, 59, 0.9); }
+        
+        /* Sidebar Link Styles */
+        .sidebar-link { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 0.75rem; font-weight: 500; color: #010710; transition: all 0.2s; }
+        .dark .sidebar-link { color: #d1d5db; }
+        .sidebar-link:hover { background-color: rgba(59,130,246,0.1); color: #2563eb; }
+        .sidebar-link.active { background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+        
+        /* Button Styles */
+        .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.5rem; transition: all 0.2s; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+        
+        /* Animation */
+        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; opacity: 0; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+
+<body class="font-inter overflow-hidden text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-900">
+
+    <div class="h-screen flex">
+        
+        <aside id="sidebar" class="w-64 p-4 glass-sidebar shadow-2xl fixed inset-y-0 left-0 z-50 transform -translate-x-full md:relative md:translate-x-0 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center gap-3 mb-10 px-2">
+                    <div class="bg-blue-600 p-2 rounded-lg"><i data-lucide="activity" class="text-white w-6 h-6"></i></div>
+                    <h1 class="text-xl font-bold tracking-tight">Prognosys</h1>
+                </div>
+                <nav class="space-y-2">
+                    <a href="/" class="sidebar-link"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
+                    <a href="heart_prediction.html" class="sidebar-link"><i data-lucide="heart-pulse"></i><span>Heart Prediction</span></a>
+                    <a href="brain_tumor.html" class="sidebar-link active"><i data-lucide="brain-circuit"></i><span>Brain Tumor</span></a>
+                    <a href="eye_glaucoma.html" class="sidebar-link"><i data-lucide="eye"></i><span>Eye Glaucoma</span></a>
+                </nav>
+            </div>
+            
+            <div class="space-y-2">
+                <button id="open-settings-btn" class="sidebar-link w-full"><i data-lucide="settings-2"></i><span>Settings</span></button>
+                <button id="logout-button" class="sidebar-link w-full text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10"><i data-lucide="log-out"></i><span>Logout</span></button>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col relative h-full overflow-hidden">
+            
+            <div class="absolute inset-0 z-0">
+                <video autoplay muted loop playsinline class="w-full h-full object-cover" poster="https://placehold.co/1920x1080/1e293b/4B7BE5?text=MRI+Scan">
+                    <source src="mri brain.mp4" type="video/mp4">
+                </video>
+                <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-[2px]"></div>
+            </div>
+
+            <header class="md:hidden flex items-center justify-between p-4 z-40 relative glass-header">
+                <button id="sidebar-toggle-button" class="p-2 rounded-lg bg-white/10 text-white backdrop-blur-md"><i data-lucide="menu"></i></button>
+                <span class="text-white font-bold text-lg">Prognosys</span>
+            </header>
+
+            <main class="flex-1 p-4 sm:p-8 z-10 relative flex items-center justify-center overflow-y-auto">
+                <div id="brain-form-container" class="w-full max-w-xl glass-card p-8 rounded-2xl shadow-2xl animate-fade-in border border-white/10">
+                    
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold text-white">MRI Analysis</h2>
+                        <p class="text-slate-300 mt-2">Upload Brain MRI for Tumor & Epilepsy Detection</p>
+                    </div>
+
+                    <div class="flex flex-col items-center space-y-6">
+                        <div class="relative w-full h-64 bg-slate-100/10 rounded-xl border-2 border-dashed border-slate-500 hover:border-blue-500 transition-colors flex items-center justify-center overflow-hidden group">
+                            <img id="brain-image-preview" src="" alt="" class="absolute inset-0 w-full h-full object-contain hidden">
+                            <div id="upload-placeholder" class="text-center p-4">
+                                <i data-lucide="upload-cloud" class="w-12 h-12 text-slate-400 mx-auto mb-2 group-hover:text-blue-400 transition-colors"></i>
+                                <p class="text-sm text-slate-300">Click to upload MRI Scan</p>
+                            </div>
+                            <input type="file" id="brain-file-input" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                        </div>
+
+                        <button id="analyze-button" class="btn-primary w-full shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2">
+                            <i data-lucide="scan"></i> <span>Analyze Scan</span>
+                        </button>
+                    </div>
+
+                    <div id="brain-loader" class="hidden mt-8 text-center">
+                        <div class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                        <p class="text-blue-300 mt-3 font-medium animate-pulse">Running Deep Learning Model...</p>
+                    </div>
+
+                    <div id="brain-result" class="hidden mt-8 pt-6 border-t border-slate-600">
+                        <h3 class="text-xl font-bold text-center text-white mb-4">Analysis Report</h3>
+                        
+                        <div id="result-content" class="glass-header p-4 rounded-xl text-slate-200 space-y-2 text-sm border border-white/10">
+                            </div>
+
+                        <div class="mt-4">
+                            <p class="text-xs text-slate-400 mb-2 uppercase font-bold text-center">Grad-CAM Heatmap</p>
+                            <img id="heatmap-preview" class="w-full rounded-lg border border-slate-600 shadow-lg hidden">
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="fixed inset-0 z-[90] items-center justify-center bg-black/70 backdrop-blur-sm hidden" style="display: none;">
+        <div class="glass-modal-content rounded-2xl w-full max-w-lg p-6 mx-4">
+            <h2 class="text-xl font-bold mb-4 dark:text-white">Settings</h2>
+            <div class="flex justify-between items-center mb-4 border-b pb-4 dark:border-gray-700">
+                <span class="dark:text-gray-300">Dark Mode</span>
+                <button id="close-settings-btn" class="text-blue-500">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="chat-modal" class="hidden"></div>
+    <div id="profile-modal" class="hidden"></div>
+    <div id="chat-launcher" class="hidden"></div>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // UI Elements
+        const fileInput = document.getElementById('brain-file-input');
+        const preview = document.getElementById('brain-image-preview');
+        const placeholder = document.getElementById('upload-placeholder');
+        const analyzeButton = document.getElementById('analyze-button');
+        const loader = document.getElementById('brain-loader');
+        const resultBox = document.getElementById('brain-result');
+        const resultContent = document.getElementById('result-content');
+        const heatmapPreview = document.getElementById('heatmap-preview');
+        const sidebar = document.getElementById('sidebar');
+
+        // Sidebar Toggle
+        document.getElementById('sidebar-toggle-button')?.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+        });
+
+        // Image Preview Logic
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (file) {
+                preview.src = URL.createObjectURL(file);
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            }
+        });
+
+        // --- BACKEND CONNECTION LOGIC (UNCHANGED) ---
+        analyzeButton.addEventListener('click', async () => {
+            const file = fileInput.files[0];
+            if (!file) return alert('Please upload an MRI image first.');
+
+            // UI Updates
+            loader.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+            heatmapPreview.classList.add('hidden');
+            analyzeButton.disabled = true;
+            analyzeButton.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                // Fetch from local Python Backend
+                const response = await fetch('http://localhost:5000/brain', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                loader.classList.add('hidden');
+                analyzeButton.disabled = false;
+                analyzeButton.classList.remove('opacity-50', 'cursor-not-allowed');
+
+                if (data.error) {
+                    contentResult.innerHTML = `<p class="text-red-400 font-bold text-center">Error: ${data.error}</p>`;
+                } else {
+                    // Format the result nicely
+                    let severityClass = data.severity_category === 'High' ? 'text-red-400' : 'text-yellow-400';
+                    if(data.prediction.toLowerCase().includes("no tumor")) severityClass = 'text-green-400';
+
+                    resultContent.innerHTML = `
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><p class="text-xs text-slate-400">Prediction</p><p class="text-lg font-bold text-white">${data.prediction}</p></div>
+                            <div><p class="text-xs text-slate-400">Confidence</p><p class="text-lg font-bold text-blue-400">${(parseFloat(data.confidence)*100).toFixed(2)}%</p></div>
+                            <div><p class="text-xs text-slate-400">Severity Score</p><p class="font-mono">${data.severity_score}</p></div>
+                            <div><p class="text-xs text-slate-400">Category</p><p class="font-bold ${severityClass}">${data.severity_category}</p></div>
+                        </div>
+                    `;
+
+                    // Handle Base64 Heatmap
+                    if (data.heatmap) {
+                        heatmapPreview.src = `data:image/png;base64,${data.heatmap}`;
+                        heatmapPreview.classList.remove('hidden');
+                    }
+                }
+
+                resultBox.classList.remove('hidden');
+
+            } catch(err) {
+                loader.classList.add('hidden');
+                analyzeButton.disabled = false;
+                analyzeButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                
+                resultBox.classList.remove('hidden');
+                resultContent.innerHTML = `<p class="text-red-400 text-center"><strong>Connection Error:</strong><br>Ensure Flask backend is running on port 5000.</p>`;
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+</html>

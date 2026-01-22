@@ -421,7 +421,14 @@ def calculate():
 
 
 # Load your trained model
-model1 = tf.keras.models.load_model('glaucoma_model.keras')
+
+model1 = None
+
+def load_model_once():
+    global model1
+    if model1 is None:
+        model1 = tf.keras.models.load_model("glaucoma_model.keras")
+
 
 # Define image size expected by the model
 target_size = (256, 256)
@@ -442,6 +449,7 @@ def predict():
         img_array = np.expand_dims(img_array, axis=0) / 255.0
 
         # Make prediction
+        load_model_once()
         prediction = model1.predict(img_array)[0][0]
         result = 'Glaucoma' if prediction > 0.5 else 'No Glaucoma'
 
@@ -616,12 +624,8 @@ def brain():
         print("❌ Error:", e)
         return jsonify({'error': 'Error processing image'}), 500
 
-# if __name__ == '__main__':
-#     print("Starting Enhanced Cardiovascular Risk  and Glaucoma Assessment API (V9 - Final Viz Fix) on Port 5000...")
-#     # IMPORTANT: Use use_reloader=False if you see caching issues after repeated saves.
-#     app.run(debug=True, port=5000)
+if __name__ == '__main__':
+    print("Starting Enhanced Cardiovascular Risk  and Glaucoma Assessment API (V9 - Final Viz Fix) on Port 5000...")
+    # IMPORTANT: Use use_reloader=False if you see caching issues after repeated saves.
+    app.run(debug=True, port=5000)
 
-import os
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)

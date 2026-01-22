@@ -623,20 +623,9 @@ def brain():
     except Exception as e:
         print("❌ Error:", e)
         return jsonify({'error': 'Error processing image'}), 500
-<<<<<<< HEAD
 
 if __name__ == '__main__':
     print("Starting Enhanced Cardiovascular Risk  and Glaucoma Assessment API (V9 - Final Viz Fix) on Port 5000...")
     # IMPORTANT: Use use_reloader=False if you see caching issues after repeated saves.
     app.run(debug=True, port=5000)
 
-=======
-import os
-
-if os.getenv("RENDER") is None:
-    app.run(debug=True, port=5000)
-
-
-
-
->>>>>>> 66726bd63e8a4e502383fd2ef484445da1ab39f1

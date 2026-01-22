@@ -1,6 +1,12 @@
+
+gunicorn
 flask
 flask-cors
-plotly
 numpy
-gunicorn
-
+plotly
+tensorflow
+keras
+torch
+torchvision
+pillow
+opencv-python

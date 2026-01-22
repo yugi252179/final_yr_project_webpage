@@ -616,12 +616,7 @@ def brain():
         print("❌ Error:", e)
         return jsonify({'error': 'Error processing image'}), 500
 
-# if __name__ == '__main__':
-#     print("Starting Enhanced Cardiovascular Risk  and Glaucoma Assessment API (V9 - Final Viz Fix) on Port 5000...")
-#     # IMPORTANT: Use use_reloader=False if you see caching issues after repeated saves.
-#     app.run(debug=True, port=5000)
+if __name__ == '__main__':
+    print("Starting Enhanced Cardiovascular Risk  and Glaucoma Assessment API (V9 - Final Viz Fix) on Port 5000...")
+    app.run(debug=True, port=5000)
 
-import os
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)

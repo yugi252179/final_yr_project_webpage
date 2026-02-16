@@ -472,12 +472,19 @@ class EpilepsyDetectionModel(nn.Module):
     def forward(self, x):
         return self.efficientnet(x)
 
+
+model_path = none
+def load_model_once():
+    global model_path
+    if model_path is None:
+        model_path = tf.keras.models.load_model("epilepsy_detection_model.pth")
 # --- Load the Trained Model ---
-model_path = "epilepsy_detection_model.pth"
+
 num_classes = 2
 model = EpilepsyDetectionModel(num_classes=num_classes)
 
 try:
+    
     state_dict = torch.load(model_path, map_location="cpu")
     new_state_dict = OrderedDict()
     for k, v in state_dict.items():

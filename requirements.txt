@@ -1,7 +1,10 @@
 flask
 numpy
 pillow
-tensorflow
+
 torch
 torchvision
 opencv-python
+
+tensorflow==2.10.1
+

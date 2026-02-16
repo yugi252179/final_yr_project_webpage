@@ -422,12 +422,22 @@ def calculate():
 
 # Load your trained model
 
-model1 = None
+# model1 = None
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def load_model_once():
     global model1
     if model1 is None:
-        model1 = tf.keras.models.load_model("glaucoma_model.keras")
+        model_pathq= os.path.join(BASE_DIR, "glaucoma_model.keras")
+        model1 = tf.keras.models.load_model(model_pathq)
+
+
+# def load_model_once():
+#     global model1
+#     if model1 is None:
+#         model1 = tf.keras.models.load_model("glaucoma_model.keras")
 
 
 # Define image size expected by the model

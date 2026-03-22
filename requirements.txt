@@ -1,10 +1,1 @@
-flask
-numpy
-pillow
-
-torch
-torchvision
-opencv-python
-
-tensorflow
 

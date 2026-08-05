@@ -154,6 +154,4 @@ If you find this work useful or reference Prognosys in your research, please cit
 
 ---
 
-## 🛡️ License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
